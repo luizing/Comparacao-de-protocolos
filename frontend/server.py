@@ -14,10 +14,10 @@ import grpc
 import httpx
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
-from google.protobuf import json_format
+from google.protobuf import empty_pb2, json_format
 
-import streaming_pb2 as pb
-import streaming_pb2_grpc as pb_grpc
+import catalogo_pb2 as pb
+import catalogo_pb2_grpc as pb_grpc
 
 PASTA = Path(__file__).parent
 HOSTS_PERMITIDOS = {"localhost", "127.0.0.1"}
@@ -63,14 +63,15 @@ async def ponte_grpc(op: str, req: Request):
     endereco = dados.get("endereco", "localhost:50051")
     if endereco.split(":")[0] not in HOSTS_PERMITIDOS:
         raise HTTPException(400, "Só é permitido chamar serviços em localhost")
-    metodo = pb.DESCRIPTOR.services_by_name["Streaming"].methods_by_name.get(op)
+    metodo = pb.DESCRIPTOR.services_by_name["Catalogo"].methods_by_name.get(op)
     if metodo is None:
         raise HTTPException(404, f"Operação gRPC desconhecida: {op}")
 
-    requisicao = json_format.ParseDict(dados.get("corpo", {}), getattr(pb, metodo.input_type.name)())
+    classe = empty_pb2.Empty if metodo.input_type.full_name == "google.protobuf.Empty" else getattr(pb, metodo.input_type.name)
+    requisicao = json_format.ParseDict(dados.get("corpo", {}), classe())
     if endereco not in canais:
         canais[endereco] = grpc.insecure_channel(endereco)
-    stub = pb_grpc.StreamingStub(canais[endereco])
+    stub = pb_grpc.CatalogoStub(canais[endereco])
 
     inicio = time.perf_counter()
     try:

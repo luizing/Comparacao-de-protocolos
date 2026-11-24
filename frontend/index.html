@@ -64,6 +64,10 @@
 <body>
 <header>
   <h1>Streaming de Músicas</h1>
+  <div class="protocolos" id="implementacoes">
+    <button data-i="java">Java</button>
+    <button data-i="python">Python</button>
+  </div>
   <div class="protocolos" id="protocolos">
     <button data-p="rest">REST</button>
     <button data-p="graphql">GraphQL</button>
@@ -134,15 +138,32 @@
 
 <script>
 // ===================== configuração =====================
+// Portas usadas pelo rodar-tudo.ps1 (dá para mudar no campo "Servidor").
 const PADRAO = {
-  rest: "http://localhost:8080/api",
-  graphql: "http://localhost:8080/graphql",
-  soap: "http://localhost:8080/ws",
-  grpc: "localhost:50051",
+  java: {
+    rest: "http://localhost:9081/api",
+    graphql: "http://localhost:9082/graphql",
+    soap: "http://localhost:9083/ws",
+    grpc: "localhost:9090",
+  },
+  python: {
+    rest: "http://localhost:8001/api",
+    graphql: "http://localhost:8002/graphql",
+    soap: "http://localhost:8003/ws",
+    grpc: "localhost:50051",
+  },
 };
 const NOMES = { rest: "REST", graphql: "GraphQL", soap: "SOAP", grpc: "gRPC" };
-const enderecos = Object.assign({}, PADRAO, JSON.parse(localStorage.getItem("enderecos") || "{}"));
+const IMPLS = { java: "Java", python: "Python" };
+const salvos = JSON.parse(localStorage.getItem("enderecos-v2") || "{}");
+const todosEnderecos = {
+  java: Object.assign({}, PADRAO.java, salvos.java),
+  python: Object.assign({}, PADRAO.python, salvos.python),
+};
+let impl = localStorage.getItem("impl") || "java";
+let enderecos = todosEnderecos[impl];
 let protocolo = localStorage.getItem("protocolo") || "rest";
+const rotulo = () => `${NOMES[protocolo]} · ${IMPLS[impl]}`;
 
 // As entidades e os campos são os mesmos em todos os protocolos.
 const ENT = {
@@ -291,11 +312,14 @@ const adaptadores = {
 
   async grpc(op, args) {
     const { acao, ent } = descrever(op);
-    const corpo = {};
+    // catalogo.proto: no Atualizar os dados vão em "input"; as consultas começam com "Listar"
+    const corpo = {}, dados = {};
     if (args.id !== undefined) corpo.id = args.id;
     if (acao === "Criar" || acao === "Atualizar")
-      for (const c of ENT[ent].campos) if (args[c] !== null && args[c] !== undefined && args[c] !== "") corpo[c] = args[c];
-    const r = await fetch(`/grpc/${op}`, {
+      for (const c of ENT[ent].campos) if (args[c] !== null && args[c] !== undefined && args[c] !== "") dados[c] = args[c];
+    if (acao === "Atualizar") corpo.input = dados; else Object.assign(corpo, dados);
+    const rpc = CONSULTAS[op] ? `Listar${op}` : op;
+    const r = await fetch(`/grpc/${rpc}`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ endereco: enderecos.grpc, corpo }),
     });
@@ -303,7 +327,7 @@ const adaptadores = {
     const j = await r.json();
     const nBytes = hex => hex ? hex.split(" ").length : 0;
     const res = {
-      requisicao: `rpc Streaming/${op} → ${enderecos.grpc}\n\nMensagem (JSON):\n${JSON.stringify(corpo, null, 2)}\n\nProtobuf binário (hex):\n${j.bytesRequisicao || "(vazio)"}`,
+      requisicao: `rpc catalogo.Catalogo/${rpc} → ${enderecos.grpc}\n\nMensagem (JSON):\n${JSON.stringify(corpo, null, 2)}\n\nProtobuf binário (hex):\n${j.bytesRequisicao || "(vazio)"}`,
       resposta: j.ok ? `Mensagem (JSON):\n${JSON.stringify(j.resposta, null, 2)}\n\nProtobuf binário (hex):\n${j.bytesResposta || "(vazio)"}` : `${j.codigo}: ${j.erro}`,
       status: j.ok ? "OK" : j.codigo, ms: j.ms, enviado: nBytes(j.bytesRequisicao), recebido: nBytes(j.bytesResposta),
     };
@@ -331,12 +355,12 @@ function xmlBonito(xml) {
 // ===================== chamada genérica =====================
 // mostrar = false para as recargas automáticas (só entram no histórico)
 async function chamar(op, args = {}, mostrar = true) {
-  const p = protocolo;
+  const p = protocolo, nome = rotulo();
   let res;
   try { res = await adaptadores[p](op, args); }
   catch (e) { res = { erro: e.message, status: "erro", requisicao: "", resposta: e.message, ms: 0, enviado: 0, recebido: 0 }; }
-  registrar(p, op, res);
-  if (mostrar || res.erro) detalhar(p, op, res);
+  registrar(nome, op, res);
+  if (mostrar || res.erro) detalhar(nome, op, res);
   if (res.erro) throw new Error(res.erro);
   const { ent, lista, acao } = descrever(op);
   if (acao === "Excluir") return null;
@@ -345,19 +369,19 @@ async function chamar(op, args = {}, mostrar = true) {
   return normalizar(ent, Array.isArray(dados) ? dados[0] : dados);
 }
 
-function registrar(p, op, r) {
+function registrar(nome, op, r) {
   const tr = document.createElement("tr");
-  tr.innerHTML = `<td>${NOMES[p]}</td><td>${op}</td><td class="${r.erro ? "erro" : "ok"}">${esc(r.status)}</td>
+  tr.innerHTML = `<td>${nome}</td><td>${op}</td><td class="${r.erro ? "erro" : "ok"}">${esc(r.status)}</td>
     <td class="num">${(r.ms || 0).toFixed(1)}</td><td class="num">${r.enviado} B</td><td class="num">${r.recebido} B</td>`;
   const tbody = document.querySelector("#log tbody");
   tbody.prepend(tr);
   while (tbody.children.length > 40) tbody.lastChild.remove();
 }
 
-function detalhar(p, op, r) {
+function detalhar(nome, op, r) {
   document.getElementById("detalhe").className = "";
   document.getElementById("detalhe").innerHTML = `
-    <div class="meta"><span class="tag">${NOMES[p]}</span><span>${op}</span>
+    <div class="meta"><span class="tag">${nome}</span><span>${op}</span>
       <span>Status <b class="${r.erro ? "erro" : "ok"}">${esc(r.status)}</b></span>
       <span>Tempo <b>${(r.ms || 0).toFixed(1)} ms</b></span>
       <span>Enviado <b>${r.enviado} B</b></span><span>Recebido <b>${r.recebido} B</b></span></div>
@@ -469,7 +493,7 @@ document.querySelector("main").addEventListener("click", async e => {
       const itens = await chamar(op, { id });
       const ent = CONSULTAS[op].ent;
       div.className = "";
-      div.innerHTML = `<div class="meta"><span class="tag">${NOMES[protocolo]}</span><span>${op}(${id})</span><span><b>${itens.length}</b> resultado(s)</span></div>` +
+      div.innerHTML = `<div class="meta"><span class="tag">${rotulo()}</span><span>${op}(${id})</span><span><b>${itens.length}</b> resultado(s)</span></div>` +
         (itens.length ? `<table><thead><tr><th class="num">id</th><th>Nome</th><th>${ent === "Musica" ? "Artista" : "Músicas"}</th></tr></thead><tbody>` +
           itens.map(o => `<tr><td class="num">${o.id}</td><td>${esc(o.nome)}</td><td>${esc(ent === "Musica" ? o.artista : o.musicaIds.map(nomeMusica).join(", "))}</td></tr>`).join("") +
           `</tbody></table>` : `<div class="vazio">Nenhum resultado.</div>`);
@@ -496,6 +520,7 @@ function escolher(p) {
   protocolo = p;
   localStorage.setItem("protocolo", p);
   document.querySelectorAll("#protocolos button").forEach(b => b.classList.toggle("ativo", b.dataset.p === p));
+  document.querySelectorAll("#implementacoes button").forEach(b => b.classList.toggle("ativo", b.dataset.i === impl));
   inputEndereco.value = enderecos[p];
   for (const ent of Object.keys(ENT)) editando[ent] = null;
   cache = { Usuario: [], Musica: [], Playlist: [] };  // não mostrar dados do protocolo anterior
@@ -506,10 +531,17 @@ function escolher(p) {
   recarregar();
 }
 document.getElementById("protocolos").addEventListener("click", e => { if (e.target.dataset.p) escolher(e.target.dataset.p); });
+document.getElementById("implementacoes").addEventListener("click", e => {
+  if (!e.target.dataset.i) return;
+  impl = e.target.dataset.i;
+  localStorage.setItem("impl", impl);
+  enderecos = todosEnderecos[impl];
+  escolher(protocolo);
+});
 inputEndereco.addEventListener("change", () => {
-  enderecos[protocolo] = inputEndereco.value.trim() || PADRAO[protocolo];
+  enderecos[protocolo] = inputEndereco.value.trim() || PADRAO[impl][protocolo];
   inputEndereco.value = enderecos[protocolo];
-  localStorage.setItem("enderecos", JSON.stringify(enderecos));
+  localStorage.setItem("enderecos-v2", JSON.stringify(todosEnderecos));
   recarregar();
 });
 document.getElementById("btn-recarregar").addEventListener("click", recarregar);
