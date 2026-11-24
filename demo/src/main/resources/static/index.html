@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo de músicas</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Catálogo de músicas</h1>
+      <p>Cliente simples para a API REST.</p>
+    </header>
+
+    <p id="mensagem" role="status" aria-live="polite"></p>
+
+    <section>
+      <div class="section-title"><h2>Usuários</h2><button type="button" onclick="carregarUsuarios()">Atualizar</button></div>
+      <form id="form-usuario">
+        <input type="hidden" id="usuario-id">
+        <label>Nome <input id="usuario-nome" required></label>
+        <label>Idade <input id="usuario-idade" type="number" min="0" required></label>
+        <button type="submit">Salvar usuário</button>
+        <button class="secundario" type="button" onclick="limparUsuario()">Cancelar</button>
+      </form>
+      <div id="usuarios" class="lista"></div>
+    </section>
+
+    <section>
+      <div class="section-title"><h2>Músicas</h2><button type="button" onclick="carregarMusicas()">Atualizar</button></div>
+      <form id="form-musica">
+        <input type="hidden" id="musica-id">
+        <label>Nome <input id="musica-nome" required></label>
+        <label>Artista <input id="musica-artista" required></label>
+        <button type="submit">Salvar música</button>
+        <button class="secundario" type="button" onclick="limparMusica()">Cancelar</button>
+      </form>
+      <div id="musicas" class="lista"></div>
+    </section>
+
+    <section>
+      <div class="section-title"><h2>Playlists</h2><button type="button" onclick="carregarPlaylists()">Atualizar</button></div>
+      <form id="form-playlist">
+        <input type="hidden" id="playlist-id">
+        <label>Nome <input id="playlist-nome" required></label>
+        <label>Usuário <select id="playlist-usuario" required></select></label>
+        <label>Músicas <select id="playlist-musicas" multiple size="4"></select></label>
+        <button type="submit">Salvar playlist</button>
+        <button class="secundario" type="button" onclick="limparPlaylist()">Cancelar</button>
+      </form>
+      <div id="playlists" class="lista"></div>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+services:
+  grpc-web-proxy:
+    image: envoyproxy/envoy:v1.34.7
+    ports:
+      - "8081:8081"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./grpc-web/envoy.yaml:/etc/envoy/envoy.yaml:ro
