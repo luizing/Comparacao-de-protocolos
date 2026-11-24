@@ -1,15 +1,22 @@
 """Serviço de streaming de músicas - versão gRPC em Python (grpcio).
 
-Gere o código a partir do .proto antes de rodar:
-  python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. streaming.proto
+Usa o MESMO contrato da versão Java (catalogo.proto, branch grpc), então
+qualquer cliente funciona com as duas versões.
+
+Se alterar o .proto, gere o código de novo:
+  python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. catalogo.proto
 """
+import sys
 from concurrent import futures
 
 import grpc
+from google.protobuf import empty_pb2
 
-import streaming_pb2 as pb
-import streaming_pb2_grpc as pb_grpc
+import catalogo_pb2 as pb
+import catalogo_pb2_grpc as pb_grpc
 from catalogo import Catalogo, NaoEncontrado
+
+VAZIO = empty_pb2.Empty()
 
 
 def usuario(d):
@@ -34,14 +41,14 @@ def trata_erros(metodo):
     return wrapper
 
 
-class StreamingService(pb_grpc.StreamingServicer):
+class CatalogoService(pb_grpc.CatalogoServicer):
     def __init__(self):
         self.s = Catalogo()
 
     # ---------- usuários ----------
     @trata_erros
     def ListarUsuarios(self, req, ctx):
-        return pb.ListaUsuarios(usuarios=[usuario(u) for u in self.s.listar_usuarios()])
+        return pb.UsuariosResponse(usuarios=[usuario(u) for u in self.s.listar_usuarios()])
 
     @trata_erros
     def BuscarUsuario(self, req, ctx):
@@ -53,17 +60,17 @@ class StreamingService(pb_grpc.StreamingServicer):
 
     @trata_erros
     def AtualizarUsuario(self, req, ctx):
-        return usuario(self.s.atualizar_usuario(req.id, req.nome, req.idade))
+        return usuario(self.s.atualizar_usuario(req.id, req.input.nome, req.input.idade))
 
     @trata_erros
     def ExcluirUsuario(self, req, ctx):
         self.s.excluir_usuario(req.id)
-        return pb.Vazio()
+        return VAZIO
 
     # ---------- músicas ----------
     @trata_erros
     def ListarMusicas(self, req, ctx):
-        return pb.ListaMusicas(musicas=[musica(m) for m in self.s.listar_musicas()])
+        return pb.MusicasResponse(musicas=[musica(m) for m in self.s.listar_musicas()])
 
     @trata_erros
     def BuscarMusica(self, req, ctx):
@@ -75,17 +82,17 @@ class StreamingService(pb_grpc.StreamingServicer):
 
     @trata_erros
     def AtualizarMusica(self, req, ctx):
-        return musica(self.s.atualizar_musica(req.id, req.nome, req.artista))
+        return musica(self.s.atualizar_musica(req.id, req.input.nome, req.input.artista))
 
     @trata_erros
     def ExcluirMusica(self, req, ctx):
         self.s.excluir_musica(req.id)
-        return pb.Vazio()
+        return VAZIO
 
     # ---------- playlists ----------
     @trata_erros
     def ListarPlaylists(self, req, ctx):
-        return pb.ListaPlaylists(playlists=[playlist(p) for p in self.s.listar_playlists()])
+        return pb.PlaylistsResponse(playlists=[playlist(p) for p in self.s.listar_playlists()])
 
     @trata_erros
     def BuscarPlaylist(self, req, ctx):
@@ -97,35 +104,36 @@ class StreamingService(pb_grpc.StreamingServicer):
 
     @trata_erros
     def AtualizarPlaylist(self, req, ctx):
-        return playlist(self.s.atualizar_playlist(req.id, req.nome, req.usuario_id, list(req.musica_ids)))
+        i = req.input
+        return playlist(self.s.atualizar_playlist(req.id, i.nome, i.usuario_id, list(i.musica_ids)))
 
     @trata_erros
     def ExcluirPlaylist(self, req, ctx):
         self.s.excluir_playlist(req.id)
-        return pb.Vazio()
+        return VAZIO
 
     # ---------- consultas ----------
     @trata_erros
-    def PlaylistsDoUsuario(self, req, ctx):
-        return pb.ListaPlaylists(playlists=[playlist(p) for p in self.s.playlists_do_usuario(req.id)])
+    def ListarPlaylistsDoUsuario(self, req, ctx):
+        return pb.PlaylistsResponse(playlists=[playlist(p) for p in self.s.playlists_do_usuario(req.id)])
 
     @trata_erros
-    def MusicasDaPlaylist(self, req, ctx):
-        return pb.ListaMusicas(musicas=[musica(m) for m in self.s.musicas_da_playlist(req.id)])
+    def ListarMusicasDaPlaylist(self, req, ctx):
+        return pb.MusicasResponse(musicas=[musica(m) for m in self.s.musicas_da_playlist(req.id)])
 
     @trata_erros
-    def PlaylistsDaMusica(self, req, ctx):
-        return pb.ListaPlaylists(playlists=[playlist(p) for p in self.s.playlists_da_musica(req.id)])
+    def ListarPlaylistsDaMusica(self, req, ctx):
+        return pb.PlaylistsResponse(playlists=[playlist(p) for p in self.s.playlists_da_musica(req.id)])
 
 
 def serve(porta=50051):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    pb_grpc.add_StreamingServicer_to_server(StreamingService(), server)
+    pb_grpc.add_CatalogoServicer_to_server(CatalogoService(), server)
     server.add_insecure_port(f"[::]:{porta}")
     server.start()
-    print(f"Servidor gRPC rodando na porta {porta}")
+    print(f"Servidor gRPC rodando na porta {porta}", flush=True)
     server.wait_for_termination()
 
 
 if __name__ == "__main__":
-    serve()
+    serve(int(sys.argv[1]) if len(sys.argv) > 1 else 50051)

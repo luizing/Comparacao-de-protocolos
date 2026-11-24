@@ -3,7 +3,8 @@
 import grpc
 import warnings
 
-import streaming_pb2 as streaming__pb2
+import catalogo_pb2 as catalogo__pb2
+from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 GRPC_GENERATED_VERSION = '1.85.4'
 GRPC_VERSION = grpc.__version__
@@ -18,16 +19,15 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + ' but the generated code in streaming_pb2_grpc.py depends on'
+        + ' but the generated code in catalogo_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
-class StreamingStub:
-    """---------- serviço ----------
-    """
+class CatalogoStub:
+    """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
         """Constructor.
@@ -36,100 +36,99 @@ class StreamingStub:
             channel: A grpc.Channel.
         """
         self.ListarUsuarios = channel.unary_unary(
-                '/streaming.Streaming/ListarUsuarios',
-                request_serializer=streaming__pb2.Vazio.SerializeToString,
-                response_deserializer=streaming__pb2.ListaUsuarios.FromString,
+                '/catalogo.Catalogo/ListarUsuarios',
+                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                response_deserializer=catalogo__pb2.UsuariosResponse.FromString,
                 _registered_method=True)
         self.BuscarUsuario = channel.unary_unary(
-                '/streaming.Streaming/BuscarUsuario',
-                request_serializer=streaming__pb2.Id.SerializeToString,
-                response_deserializer=streaming__pb2.Usuario.FromString,
+                '/catalogo.Catalogo/BuscarUsuario',
+                request_serializer=catalogo__pb2.IdRequest.SerializeToString,
+                response_deserializer=catalogo__pb2.Usuario.FromString,
                 _registered_method=True)
         self.CriarUsuario = channel.unary_unary(
-                '/streaming.Streaming/CriarUsuario',
-                request_serializer=streaming__pb2.UsuarioRequest.SerializeToString,
-                response_deserializer=streaming__pb2.Usuario.FromString,
+                '/catalogo.Catalogo/CriarUsuario',
+                request_serializer=catalogo__pb2.UsuarioRequest.SerializeToString,
+                response_deserializer=catalogo__pb2.Usuario.FromString,
                 _registered_method=True)
         self.AtualizarUsuario = channel.unary_unary(
-                '/streaming.Streaming/AtualizarUsuario',
-                request_serializer=streaming__pb2.AtualizarUsuarioRequest.SerializeToString,
-                response_deserializer=streaming__pb2.Usuario.FromString,
+                '/catalogo.Catalogo/AtualizarUsuario',
+                request_serializer=catalogo__pb2.AtualizarUsuarioRequest.SerializeToString,
+                response_deserializer=catalogo__pb2.Usuario.FromString,
                 _registered_method=True)
         self.ExcluirUsuario = channel.unary_unary(
-                '/streaming.Streaming/ExcluirUsuario',
-                request_serializer=streaming__pb2.Id.SerializeToString,
-                response_deserializer=streaming__pb2.Vazio.FromString,
+                '/catalogo.Catalogo/ExcluirUsuario',
+                request_serializer=catalogo__pb2.IdRequest.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
         self.ListarMusicas = channel.unary_unary(
-                '/streaming.Streaming/ListarMusicas',
-                request_serializer=streaming__pb2.Vazio.SerializeToString,
-                response_deserializer=streaming__pb2.ListaMusicas.FromString,
+                '/catalogo.Catalogo/ListarMusicas',
+                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                response_deserializer=catalogo__pb2.MusicasResponse.FromString,
                 _registered_method=True)
         self.BuscarMusica = channel.unary_unary(
-                '/streaming.Streaming/BuscarMusica',
-                request_serializer=streaming__pb2.Id.SerializeToString,
-                response_deserializer=streaming__pb2.Musica.FromString,
+                '/catalogo.Catalogo/BuscarMusica',
+                request_serializer=catalogo__pb2.IdRequest.SerializeToString,
+                response_deserializer=catalogo__pb2.Musica.FromString,
                 _registered_method=True)
         self.CriarMusica = channel.unary_unary(
-                '/streaming.Streaming/CriarMusica',
-                request_serializer=streaming__pb2.MusicaRequest.SerializeToString,
-                response_deserializer=streaming__pb2.Musica.FromString,
+                '/catalogo.Catalogo/CriarMusica',
+                request_serializer=catalogo__pb2.MusicaRequest.SerializeToString,
+                response_deserializer=catalogo__pb2.Musica.FromString,
                 _registered_method=True)
         self.AtualizarMusica = channel.unary_unary(
-                '/streaming.Streaming/AtualizarMusica',
-                request_serializer=streaming__pb2.AtualizarMusicaRequest.SerializeToString,
-                response_deserializer=streaming__pb2.Musica.FromString,
+                '/catalogo.Catalogo/AtualizarMusica',
+                request_serializer=catalogo__pb2.AtualizarMusicaRequest.SerializeToString,
+                response_deserializer=catalogo__pb2.Musica.FromString,
                 _registered_method=True)
         self.ExcluirMusica = channel.unary_unary(
-                '/streaming.Streaming/ExcluirMusica',
-                request_serializer=streaming__pb2.Id.SerializeToString,
-                response_deserializer=streaming__pb2.Vazio.FromString,
+                '/catalogo.Catalogo/ExcluirMusica',
+                request_serializer=catalogo__pb2.IdRequest.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
         self.ListarPlaylists = channel.unary_unary(
-                '/streaming.Streaming/ListarPlaylists',
-                request_serializer=streaming__pb2.Vazio.SerializeToString,
-                response_deserializer=streaming__pb2.ListaPlaylists.FromString,
+                '/catalogo.Catalogo/ListarPlaylists',
+                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                response_deserializer=catalogo__pb2.PlaylistsResponse.FromString,
                 _registered_method=True)
         self.BuscarPlaylist = channel.unary_unary(
-                '/streaming.Streaming/BuscarPlaylist',
-                request_serializer=streaming__pb2.Id.SerializeToString,
-                response_deserializer=streaming__pb2.Playlist.FromString,
+                '/catalogo.Catalogo/BuscarPlaylist',
+                request_serializer=catalogo__pb2.IdRequest.SerializeToString,
+                response_deserializer=catalogo__pb2.Playlist.FromString,
                 _registered_method=True)
         self.CriarPlaylist = channel.unary_unary(
-                '/streaming.Streaming/CriarPlaylist',
-                request_serializer=streaming__pb2.PlaylistRequest.SerializeToString,
-                response_deserializer=streaming__pb2.Playlist.FromString,
+                '/catalogo.Catalogo/CriarPlaylist',
+                request_serializer=catalogo__pb2.PlaylistRequest.SerializeToString,
+                response_deserializer=catalogo__pb2.Playlist.FromString,
                 _registered_method=True)
         self.AtualizarPlaylist = channel.unary_unary(
-                '/streaming.Streaming/AtualizarPlaylist',
-                request_serializer=streaming__pb2.AtualizarPlaylistRequest.SerializeToString,
-                response_deserializer=streaming__pb2.Playlist.FromString,
+                '/catalogo.Catalogo/AtualizarPlaylist',
+                request_serializer=catalogo__pb2.AtualizarPlaylistRequest.SerializeToString,
+                response_deserializer=catalogo__pb2.Playlist.FromString,
                 _registered_method=True)
         self.ExcluirPlaylist = channel.unary_unary(
-                '/streaming.Streaming/ExcluirPlaylist',
-                request_serializer=streaming__pb2.Id.SerializeToString,
-                response_deserializer=streaming__pb2.Vazio.FromString,
+                '/catalogo.Catalogo/ExcluirPlaylist',
+                request_serializer=catalogo__pb2.IdRequest.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
-        self.PlaylistsDoUsuario = channel.unary_unary(
-                '/streaming.Streaming/PlaylistsDoUsuario',
-                request_serializer=streaming__pb2.Id.SerializeToString,
-                response_deserializer=streaming__pb2.ListaPlaylists.FromString,
+        self.ListarPlaylistsDoUsuario = channel.unary_unary(
+                '/catalogo.Catalogo/ListarPlaylistsDoUsuario',
+                request_serializer=catalogo__pb2.IdRequest.SerializeToString,
+                response_deserializer=catalogo__pb2.PlaylistsResponse.FromString,
                 _registered_method=True)
-        self.MusicasDaPlaylist = channel.unary_unary(
-                '/streaming.Streaming/MusicasDaPlaylist',
-                request_serializer=streaming__pb2.Id.SerializeToString,
-                response_deserializer=streaming__pb2.ListaMusicas.FromString,
+        self.ListarMusicasDaPlaylist = channel.unary_unary(
+                '/catalogo.Catalogo/ListarMusicasDaPlaylist',
+                request_serializer=catalogo__pb2.IdRequest.SerializeToString,
+                response_deserializer=catalogo__pb2.MusicasResponse.FromString,
                 _registered_method=True)
-        self.PlaylistsDaMusica = channel.unary_unary(
-                '/streaming.Streaming/PlaylistsDaMusica',
-                request_serializer=streaming__pb2.Id.SerializeToString,
-                response_deserializer=streaming__pb2.ListaPlaylists.FromString,
+        self.ListarPlaylistsDaMusica = channel.unary_unary(
+                '/catalogo.Catalogo/ListarPlaylistsDaMusica',
+                request_serializer=catalogo__pb2.IdRequest.SerializeToString,
+                response_deserializer=catalogo__pb2.PlaylistsResponse.FromString,
                 _registered_method=True)
 
 
-class StreamingServicer:
-    """---------- serviço ----------
-    """
+class CatalogoServicer:
+    """Missing associated documentation comment in .proto file."""
 
     def ListarUsuarios(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -221,129 +220,127 @@ class StreamingServicer:
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def PlaylistsDoUsuario(self, request, context):
-        """consultas pedidas no enunciado
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def MusicasDaPlaylist(self, request, context):
+    def ListarPlaylistsDoUsuario(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def PlaylistsDaMusica(self, request, context):
+    def ListarMusicasDaPlaylist(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListarPlaylistsDaMusica(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_StreamingServicer_to_server(servicer, server):
+def add_CatalogoServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'ListarUsuarios': grpc.unary_unary_rpc_method_handler(
                     servicer.ListarUsuarios,
-                    request_deserializer=streaming__pb2.Vazio.FromString,
-                    response_serializer=streaming__pb2.ListaUsuarios.SerializeToString,
+                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    response_serializer=catalogo__pb2.UsuariosResponse.SerializeToString,
             ),
             'BuscarUsuario': grpc.unary_unary_rpc_method_handler(
                     servicer.BuscarUsuario,
-                    request_deserializer=streaming__pb2.Id.FromString,
-                    response_serializer=streaming__pb2.Usuario.SerializeToString,
+                    request_deserializer=catalogo__pb2.IdRequest.FromString,
+                    response_serializer=catalogo__pb2.Usuario.SerializeToString,
             ),
             'CriarUsuario': grpc.unary_unary_rpc_method_handler(
                     servicer.CriarUsuario,
-                    request_deserializer=streaming__pb2.UsuarioRequest.FromString,
-                    response_serializer=streaming__pb2.Usuario.SerializeToString,
+                    request_deserializer=catalogo__pb2.UsuarioRequest.FromString,
+                    response_serializer=catalogo__pb2.Usuario.SerializeToString,
             ),
             'AtualizarUsuario': grpc.unary_unary_rpc_method_handler(
                     servicer.AtualizarUsuario,
-                    request_deserializer=streaming__pb2.AtualizarUsuarioRequest.FromString,
-                    response_serializer=streaming__pb2.Usuario.SerializeToString,
+                    request_deserializer=catalogo__pb2.AtualizarUsuarioRequest.FromString,
+                    response_serializer=catalogo__pb2.Usuario.SerializeToString,
             ),
             'ExcluirUsuario': grpc.unary_unary_rpc_method_handler(
                     servicer.ExcluirUsuario,
-                    request_deserializer=streaming__pb2.Id.FromString,
-                    response_serializer=streaming__pb2.Vazio.SerializeToString,
+                    request_deserializer=catalogo__pb2.IdRequest.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
             'ListarMusicas': grpc.unary_unary_rpc_method_handler(
                     servicer.ListarMusicas,
-                    request_deserializer=streaming__pb2.Vazio.FromString,
-                    response_serializer=streaming__pb2.ListaMusicas.SerializeToString,
+                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    response_serializer=catalogo__pb2.MusicasResponse.SerializeToString,
             ),
             'BuscarMusica': grpc.unary_unary_rpc_method_handler(
                     servicer.BuscarMusica,
-                    request_deserializer=streaming__pb2.Id.FromString,
-                    response_serializer=streaming__pb2.Musica.SerializeToString,
+                    request_deserializer=catalogo__pb2.IdRequest.FromString,
+                    response_serializer=catalogo__pb2.Musica.SerializeToString,
             ),
             'CriarMusica': grpc.unary_unary_rpc_method_handler(
                     servicer.CriarMusica,
-                    request_deserializer=streaming__pb2.MusicaRequest.FromString,
-                    response_serializer=streaming__pb2.Musica.SerializeToString,
+                    request_deserializer=catalogo__pb2.MusicaRequest.FromString,
+                    response_serializer=catalogo__pb2.Musica.SerializeToString,
             ),
             'AtualizarMusica': grpc.unary_unary_rpc_method_handler(
                     servicer.AtualizarMusica,
-                    request_deserializer=streaming__pb2.AtualizarMusicaRequest.FromString,
-                    response_serializer=streaming__pb2.Musica.SerializeToString,
+                    request_deserializer=catalogo__pb2.AtualizarMusicaRequest.FromString,
+                    response_serializer=catalogo__pb2.Musica.SerializeToString,
             ),
             'ExcluirMusica': grpc.unary_unary_rpc_method_handler(
                     servicer.ExcluirMusica,
-                    request_deserializer=streaming__pb2.Id.FromString,
-                    response_serializer=streaming__pb2.Vazio.SerializeToString,
+                    request_deserializer=catalogo__pb2.IdRequest.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
             'ListarPlaylists': grpc.unary_unary_rpc_method_handler(
                     servicer.ListarPlaylists,
-                    request_deserializer=streaming__pb2.Vazio.FromString,
-                    response_serializer=streaming__pb2.ListaPlaylists.SerializeToString,
+                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    response_serializer=catalogo__pb2.PlaylistsResponse.SerializeToString,
             ),
             'BuscarPlaylist': grpc.unary_unary_rpc_method_handler(
                     servicer.BuscarPlaylist,
-                    request_deserializer=streaming__pb2.Id.FromString,
-                    response_serializer=streaming__pb2.Playlist.SerializeToString,
+                    request_deserializer=catalogo__pb2.IdRequest.FromString,
+                    response_serializer=catalogo__pb2.Playlist.SerializeToString,
             ),
             'CriarPlaylist': grpc.unary_unary_rpc_method_handler(
                     servicer.CriarPlaylist,
-                    request_deserializer=streaming__pb2.PlaylistRequest.FromString,
-                    response_serializer=streaming__pb2.Playlist.SerializeToString,
+                    request_deserializer=catalogo__pb2.PlaylistRequest.FromString,
+                    response_serializer=catalogo__pb2.Playlist.SerializeToString,
             ),
             'AtualizarPlaylist': grpc.unary_unary_rpc_method_handler(
                     servicer.AtualizarPlaylist,
-                    request_deserializer=streaming__pb2.AtualizarPlaylistRequest.FromString,
-                    response_serializer=streaming__pb2.Playlist.SerializeToString,
+                    request_deserializer=catalogo__pb2.AtualizarPlaylistRequest.FromString,
+                    response_serializer=catalogo__pb2.Playlist.SerializeToString,
             ),
             'ExcluirPlaylist': grpc.unary_unary_rpc_method_handler(
                     servicer.ExcluirPlaylist,
-                    request_deserializer=streaming__pb2.Id.FromString,
-                    response_serializer=streaming__pb2.Vazio.SerializeToString,
+                    request_deserializer=catalogo__pb2.IdRequest.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
-            'PlaylistsDoUsuario': grpc.unary_unary_rpc_method_handler(
-                    servicer.PlaylistsDoUsuario,
-                    request_deserializer=streaming__pb2.Id.FromString,
-                    response_serializer=streaming__pb2.ListaPlaylists.SerializeToString,
+            'ListarPlaylistsDoUsuario': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListarPlaylistsDoUsuario,
+                    request_deserializer=catalogo__pb2.IdRequest.FromString,
+                    response_serializer=catalogo__pb2.PlaylistsResponse.SerializeToString,
             ),
-            'MusicasDaPlaylist': grpc.unary_unary_rpc_method_handler(
-                    servicer.MusicasDaPlaylist,
-                    request_deserializer=streaming__pb2.Id.FromString,
-                    response_serializer=streaming__pb2.ListaMusicas.SerializeToString,
+            'ListarMusicasDaPlaylist': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListarMusicasDaPlaylist,
+                    request_deserializer=catalogo__pb2.IdRequest.FromString,
+                    response_serializer=catalogo__pb2.MusicasResponse.SerializeToString,
             ),
-            'PlaylistsDaMusica': grpc.unary_unary_rpc_method_handler(
-                    servicer.PlaylistsDaMusica,
-                    request_deserializer=streaming__pb2.Id.FromString,
-                    response_serializer=streaming__pb2.ListaPlaylists.SerializeToString,
+            'ListarPlaylistsDaMusica': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListarPlaylistsDaMusica,
+                    request_deserializer=catalogo__pb2.IdRequest.FromString,
+                    response_serializer=catalogo__pb2.PlaylistsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'streaming.Streaming', rpc_method_handlers)
+            'catalogo.Catalogo', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('streaming.Streaming', rpc_method_handlers)
+    server.add_registered_method_handlers('catalogo.Catalogo', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class Streaming:
-    """---------- serviço ----------
-    """
+class Catalogo:
+    """Missing associated documentation comment in .proto file."""
 
     @staticmethod
     def ListarUsuarios(request,
@@ -359,9 +356,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/ListarUsuarios',
-            streaming__pb2.Vazio.SerializeToString,
-            streaming__pb2.ListaUsuarios.FromString,
+            '/catalogo.Catalogo/ListarUsuarios',
+            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            catalogo__pb2.UsuariosResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -386,9 +383,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/BuscarUsuario',
-            streaming__pb2.Id.SerializeToString,
-            streaming__pb2.Usuario.FromString,
+            '/catalogo.Catalogo/BuscarUsuario',
+            catalogo__pb2.IdRequest.SerializeToString,
+            catalogo__pb2.Usuario.FromString,
             options,
             channel_credentials,
             insecure,
@@ -413,9 +410,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/CriarUsuario',
-            streaming__pb2.UsuarioRequest.SerializeToString,
-            streaming__pb2.Usuario.FromString,
+            '/catalogo.Catalogo/CriarUsuario',
+            catalogo__pb2.UsuarioRequest.SerializeToString,
+            catalogo__pb2.Usuario.FromString,
             options,
             channel_credentials,
             insecure,
@@ -440,9 +437,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/AtualizarUsuario',
-            streaming__pb2.AtualizarUsuarioRequest.SerializeToString,
-            streaming__pb2.Usuario.FromString,
+            '/catalogo.Catalogo/AtualizarUsuario',
+            catalogo__pb2.AtualizarUsuarioRequest.SerializeToString,
+            catalogo__pb2.Usuario.FromString,
             options,
             channel_credentials,
             insecure,
@@ -467,9 +464,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/ExcluirUsuario',
-            streaming__pb2.Id.SerializeToString,
-            streaming__pb2.Vazio.FromString,
+            '/catalogo.Catalogo/ExcluirUsuario',
+            catalogo__pb2.IdRequest.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options,
             channel_credentials,
             insecure,
@@ -494,9 +491,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/ListarMusicas',
-            streaming__pb2.Vazio.SerializeToString,
-            streaming__pb2.ListaMusicas.FromString,
+            '/catalogo.Catalogo/ListarMusicas',
+            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            catalogo__pb2.MusicasResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -521,9 +518,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/BuscarMusica',
-            streaming__pb2.Id.SerializeToString,
-            streaming__pb2.Musica.FromString,
+            '/catalogo.Catalogo/BuscarMusica',
+            catalogo__pb2.IdRequest.SerializeToString,
+            catalogo__pb2.Musica.FromString,
             options,
             channel_credentials,
             insecure,
@@ -548,9 +545,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/CriarMusica',
-            streaming__pb2.MusicaRequest.SerializeToString,
-            streaming__pb2.Musica.FromString,
+            '/catalogo.Catalogo/CriarMusica',
+            catalogo__pb2.MusicaRequest.SerializeToString,
+            catalogo__pb2.Musica.FromString,
             options,
             channel_credentials,
             insecure,
@@ -575,9 +572,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/AtualizarMusica',
-            streaming__pb2.AtualizarMusicaRequest.SerializeToString,
-            streaming__pb2.Musica.FromString,
+            '/catalogo.Catalogo/AtualizarMusica',
+            catalogo__pb2.AtualizarMusicaRequest.SerializeToString,
+            catalogo__pb2.Musica.FromString,
             options,
             channel_credentials,
             insecure,
@@ -602,9 +599,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/ExcluirMusica',
-            streaming__pb2.Id.SerializeToString,
-            streaming__pb2.Vazio.FromString,
+            '/catalogo.Catalogo/ExcluirMusica',
+            catalogo__pb2.IdRequest.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options,
             channel_credentials,
             insecure,
@@ -629,9 +626,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/ListarPlaylists',
-            streaming__pb2.Vazio.SerializeToString,
-            streaming__pb2.ListaPlaylists.FromString,
+            '/catalogo.Catalogo/ListarPlaylists',
+            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            catalogo__pb2.PlaylistsResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -656,9 +653,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/BuscarPlaylist',
-            streaming__pb2.Id.SerializeToString,
-            streaming__pb2.Playlist.FromString,
+            '/catalogo.Catalogo/BuscarPlaylist',
+            catalogo__pb2.IdRequest.SerializeToString,
+            catalogo__pb2.Playlist.FromString,
             options,
             channel_credentials,
             insecure,
@@ -683,9 +680,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/CriarPlaylist',
-            streaming__pb2.PlaylistRequest.SerializeToString,
-            streaming__pb2.Playlist.FromString,
+            '/catalogo.Catalogo/CriarPlaylist',
+            catalogo__pb2.PlaylistRequest.SerializeToString,
+            catalogo__pb2.Playlist.FromString,
             options,
             channel_credentials,
             insecure,
@@ -710,9 +707,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/AtualizarPlaylist',
-            streaming__pb2.AtualizarPlaylistRequest.SerializeToString,
-            streaming__pb2.Playlist.FromString,
+            '/catalogo.Catalogo/AtualizarPlaylist',
+            catalogo__pb2.AtualizarPlaylistRequest.SerializeToString,
+            catalogo__pb2.Playlist.FromString,
             options,
             channel_credentials,
             insecure,
@@ -737,9 +734,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/ExcluirPlaylist',
-            streaming__pb2.Id.SerializeToString,
-            streaming__pb2.Vazio.FromString,
+            '/catalogo.Catalogo/ExcluirPlaylist',
+            catalogo__pb2.IdRequest.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options,
             channel_credentials,
             insecure,
@@ -751,7 +748,7 @@ class Streaming:
             _registered_method=True)
 
     @staticmethod
-    def PlaylistsDoUsuario(request,
+    def ListarPlaylistsDoUsuario(request,
             target,
             options=(),
             channel_credentials=None,
@@ -764,9 +761,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/PlaylistsDoUsuario',
-            streaming__pb2.Id.SerializeToString,
-            streaming__pb2.ListaPlaylists.FromString,
+            '/catalogo.Catalogo/ListarPlaylistsDoUsuario',
+            catalogo__pb2.IdRequest.SerializeToString,
+            catalogo__pb2.PlaylistsResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -778,7 +775,7 @@ class Streaming:
             _registered_method=True)
 
     @staticmethod
-    def MusicasDaPlaylist(request,
+    def ListarMusicasDaPlaylist(request,
             target,
             options=(),
             channel_credentials=None,
@@ -791,9 +788,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/MusicasDaPlaylist',
-            streaming__pb2.Id.SerializeToString,
-            streaming__pb2.ListaMusicas.FromString,
+            '/catalogo.Catalogo/ListarMusicasDaPlaylist',
+            catalogo__pb2.IdRequest.SerializeToString,
+            catalogo__pb2.MusicasResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -805,7 +802,7 @@ class Streaming:
             _registered_method=True)
 
     @staticmethod
-    def PlaylistsDaMusica(request,
+    def ListarPlaylistsDaMusica(request,
             target,
             options=(),
             channel_credentials=None,
@@ -818,9 +815,9 @@ class Streaming:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/streaming.Streaming/PlaylistsDaMusica',
-            streaming__pb2.Id.SerializeToString,
-            streaming__pb2.ListaPlaylists.FromString,
+            '/catalogo.Catalogo/ListarPlaylistsDaMusica',
+            catalogo__pb2.IdRequest.SerializeToString,
+            catalogo__pb2.PlaylistsResponse.FromString,
             options,
             channel_credentials,
             insecure,
