@@ -13,7 +13,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-O serviço sobe em `http://localhost:8000`. A documentação interativa (Swagger) fica em `http://localhost:8000/docs`, e dá para testar todo o CRUD por ela.
+O serviço sobe em `http://localhost:8080`. A documentação interativa (Swagger) fica em `http://localhost:8080/docs`, e dá para testar todo o CRUD por ela.
 
 ## Endpoints
 
