@@ -11,7 +11,7 @@ Uma única página para fazer o CRUD de usuários, músicas e playlists e rodar 
 Na raiz do repositório, com a branch `frontend`:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File frontendodar-tudo.ps1
+powershell -ExecutionPolicy Bypass -File frontend\rodar-tudo.ps1
 ```
 
 O script baixa a versão mais recente de cada branch e prepara os ambientes Python. Depois abre cada servidor na sua própria janela e abre o navegador em `http://localhost:3000`. Para parar, feche as janelas. Na página, escolha **Java ou Python** e o protocolo.
