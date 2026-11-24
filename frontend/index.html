@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Streaming de Músicas: REST × GraphQL × SOAP × gRPC</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #fff; --text: #1d2330; --muted: #667085; --line: #e3e6ec;
+    --accent: #3b5bdb; --accent-soft: #e7ecff; --danger: #c92a2a; --ok: #2b8a3e; --code: #f1f3f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --card: #1b1f27; --text: #e6e8ee; --muted: #98a2b3; --line: #2b313c;
+      --accent: #7c95ff; --accent-soft: #232b45; --danger: #ff8787; --ok: #69db7c; --code: #151920;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+  header { padding: 16px 24px; border-bottom: 1px solid var(--line); background: var(--card); display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+  h1 { font-size: 17px; margin: 0 12px 0 0; }
+  h2 { font-size: 15px; margin: 0 0 10px; }
+  .protocolos { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .protocolos button { border: 0; border-right: 1px solid var(--line); background: transparent; color: var(--text); padding: 7px 16px; cursor: pointer; font-weight: 600; }
+  .protocolos button:last-child { border-right: 0; }
+  .protocolos button.ativo { background: var(--accent); color: #fff; }
+  label.endereco { display: flex; gap: 8px; align-items: center; color: var(--muted); }
+  input, select { font: inherit; color: var(--text); background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+  label.endereco input { width: 280px; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+  button.btn { font: inherit; border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+  button.btn:hover { border-color: var(--accent); }
+  button.primario { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.mini { padding: 2px 8px; font-size: 12px; }
+  button.perigo { color: var(--danger); }
+  main { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; padding: 16px 24px; }
+  @media (max-width: 1100px) { main { grid-template-columns: 1fr; } }
+  .coluna { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+  form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+  form input[type=text] { flex: 1 1 140px; min-width: 0; }
+  form input[type=number] { width: 90px; }
+  .checks { display: flex; flex-wrap: wrap; gap: 4px 12px; width: 100%; color: var(--muted); font-size: 13px; }
+  .checks label { display: flex; gap: 4px; align-items: center; color: var(--text); }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 5px 6px; border-top: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; border-top: 0; }
+  td.acoes { text-align: right; white-space: nowrap; }
+  td.num, th.num { font-variant-numeric: tabular-nums; }
+  .vazio { color: var(--muted); font-style: italic; padding: 6px; }
+  .editando { background: var(--accent-soft); }
+  pre { margin: 0; background: var(--code); border: 1px solid var(--line); border-radius: 6px; padding: 10px; overflow: auto; max-height: 300px; font: 12px/1.45 ui-monospace, Consolas, monospace; white-space: pre-wrap; word-break: break-all; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 10px; color: var(--muted); }
+  .meta b { color: var(--text); font-variant-numeric: tabular-nums; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--accent-soft); color: var(--accent); }
+  .erro { color: var(--danger); }
+  .ok { color: var(--ok); }
+  .sub { color: var(--muted); font-size: 12px; margin: 10px 0 4px; }
+  #log td { font-size: 12px; }
+  .rolagem { max-height: 360px; overflow: auto; }
+  .acoes-topo { display: flex; gap: 8px; margin-left: auto; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Streaming de Músicas</h1>
+  <div class="protocolos" id="implementacoes">
+    <button data-i="java">Java</button>
+    <button data-i="python">Python</button>
+  </div>
+  <div class="protocolos" id="protocolos">
+    <button data-p="rest">REST</button>
+    <button data-p="graphql">GraphQL</button>
+    <button data-p="soap">SOAP</button>
+    <button data-p="grpc">gRPC</button>
+  </div>
+  <label class="endereco">Servidor <input id="endereco" spellcheck="false"></label>
+  <div class="acoes-topo">
+    <button class="btn" id="btn-recarregar">Recarregar listas</button>
+    <button class="btn" id="btn-exemplo">Criar dados de exemplo</button>
+  </div>
+</header>
+
+<main>
+  <div class="coluna">
+    <section class="card">
+      <h2>Usuários</h2>
+      <form id="form-usuario">
+        <input type="text" name="nome" placeholder="Nome" required>
+        <input type="number" name="idade" placeholder="Idade" min="0">
+        <button class="btn primario" type="submit">Salvar</button>
+        <button class="btn" type="reset">Cancelar</button>
+      </form>
+      <table><thead><tr><th class="num">id</th><th>Nome</th><th>Idade</th><th></th></tr></thead><tbody id="lista-usuario"></tbody></table>
+    </section>
+
+    <section class="card">
+      <h2>Músicas</h2>
+      <form id="form-musica">
+        <input type="text" name="nome" placeholder="Nome" required>
+        <input type="text" name="artista" placeholder="Artista">
+        <button class="btn primario" type="submit">Salvar</button>
+        <button class="btn" type="reset">Cancelar</button>
+      </form>
+      <table><thead><tr><th class="num">id</th><th>Nome</th><th>Artista</th><th></th></tr></thead><tbody id="lista-musica"></tbody></table>
+    </section>
+
+    <section class="card">
+      <h2>Playlists</h2>
+      <form id="form-playlist">
+        <input type="text" name="nome" placeholder="Nome" required>
+        <select name="usuarioId" required></select>
+        <button class="btn primario" type="submit">Salvar</button>
+        <button class="btn" type="reset">Cancelar</button>
+        <div class="checks" id="checks-musicas"></div>
+      </form>
+      <table><thead><tr><th class="num">id</th><th>Nome</th><th>Usuário</th><th>Músicas</th><th></th></tr></thead><tbody id="lista-playlist"></tbody></table>
+    </section>
+  </div>
+
+  <div class="coluna">
+    <section class="card">
+      <h2>Resultado da consulta</h2>
+      <div id="consulta" class="vazio">Use os botões de consulta nas tabelas, por exemplo "Playlists" ao lado de um usuário.</div>
+    </section>
+
+    <section class="card">
+      <h2>Última chamada</h2>
+      <div id="detalhe" class="vazio">Nenhuma chamada ainda.</div>
+    </section>
+
+    <section class="card">
+      <h2>Histórico</h2>
+      <div class="rolagem"><table id="log"><thead><tr><th>Protocolo</th><th>Operação</th><th>Status</th><th class="num">ms</th><th class="num">Enviado</th><th class="num">Recebido</th></tr></thead><tbody></tbody></table></div>
+    </section>
+  </div>
+</main>
+
+<script>
+// ===================== configuração =====================
+// Portas usadas pelo rodar-tudo.ps1 (dá para mudar no campo "Servidor").
+const PADRAO = {
+  java: {
+    rest: "http://localhost:9081/api",
+    graphql: "http://localhost:9082/graphql",
+    soap: "http://localhost:9083/ws",
+    grpc: "localhost:9090",
+  },
+  python: {
+    rest: "http://localhost:8001/api",
+    graphql: "http://localhost:8002/graphql",
+    soap: "http://localhost:8003/ws",
+    grpc: "localhost:50051",
+  },
+};
+const NOMES = { rest: "REST", graphql: "GraphQL", soap: "SOAP", grpc: "gRPC" };
+const IMPLS = { java: "Java", python: "Python" };
+const salvos = JSON.parse(localStorage.getItem("enderecos-v2") || "{}");
+const todosEnderecos = {
+  java: Object.assign({}, PADRAO.java, salvos.java),
+  python: Object.assign({}, PADRAO.python, salvos.python),
+};
+let impl = localStorage.getItem("impl") || "java";
+let enderecos = todosEnderecos[impl];
+let protocolo = localStorage.getItem("protocolo") || "rest";
+const rotulo = () => `${NOMES[protocolo]} · ${IMPLS[impl]}`;
+
+// As entidades e os campos são os mesmos em todos os protocolos.
+const ENT = {
+  Usuario:  { plural: "usuarios",  campos: ["nome", "idade"],                   gql: "id nome idade" },
+  Musica:   { plural: "musicas",   campos: ["nome", "artista"],                 gql: "id nome artista" },
+  Playlist: { plural: "playlists", campos: ["nome", "usuarioId", "musicaIds"],  gql: "id nome usuarioId musicaIds" },
+};
+const CONSULTAS = {
+  PlaylistsDoUsuario: { ent: "Playlist", rest: id => `/usuarios/${id}/playlists`, gql: "playlistsDoUsuario", arg: "usuarioId" },
+  MusicasDaPlaylist:  { ent: "Musica",   rest: id => `/playlists/${id}/musicas`,   gql: "musicasDaPlaylist",  arg: "playlistId" },
+  PlaylistsDaMusica:  { ent: "Playlist", rest: id => `/musicas/${id}/playlists`,   gql: "playlistsDaMusica",  arg: "musicaId" },
+};
+
+// "CriarUsuario" -> { acao: "Criar", ent: "Usuario", lista: false }
+function descrever(op) {
+  if (CONSULTAS[op]) return { acao: "Consulta", ent: CONSULTAS[op].ent, lista: true };
+  const [, acao, resto] = op.match(/^(Listar|Buscar|Criar|Atualizar|Excluir)(.+)$/);
+  const ent = acao === "Listar" ? resto.slice(0, -1) : resto;
+  return { acao, ent, lista: acao === "Listar" };
+}
+
+function normalizar(ent, o) {
+  const r = { id: Number(o.id) };
+  for (const c of ENT[ent].campos) {
+    if (c === "musicaIds") r.musicaIds = (o.musicaIds || []).map(Number).sort((a, b) => a - b);
+    else if (c === "usuarioId") r.usuarioId = Number(o.usuarioId);
+    else if (c === "idade") r.idade = o.idade === null || o.idade === undefined || o.idade === "" ? null : Number(o.idade);
+    else r[c] = o[c] ?? "";
+  }
+  return r;
+}
+
+const lcfirst = s => s[0].toLowerCase() + s.slice(1);
+const bytes = s => new TextEncoder().encode(s || "").length;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+async function proxy(metodo, url, corpo, contentType, soapAction) {
+  const r = await fetch("/proxy", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ metodo, url, corpo, contentType, soapAction }),
+  });
+  if (!r.ok) throw new Error((await r.json()).detail || r.statusText);
+  return r.json();
+}
+
+// ===================== adaptadores =====================
+// Cada um recebe a MESMA operação e os MESMOS argumentos e devolve
+// { requisicao, resposta, status, ms, enviado, recebido, dados | erro }.
+
+const adaptadores = {
+  async rest(op, args) {
+    const { acao, ent } = descrever(op);
+    const base = enderecos.rest.replace(/\/$/, "");
+    const plural = ENT[ent].plural;
+    const { id, ...corpoArgs } = args;
+    let metodo = "GET", caminho = `/${plural}`, corpo = "";
+    if (CONSULTAS[op]) caminho = CONSULTAS[op].rest(id);
+    else if (acao === "Buscar") caminho += `/${id}`;
+    else if (acao === "Criar") { metodo = "POST"; corpo = JSON.stringify(corpoArgs, null, 2); }
+    else if (acao === "Atualizar") { metodo = "PUT"; caminho += `/${id}`; corpo = JSON.stringify(corpoArgs, null, 2); }
+    else if (acao === "Excluir") { metodo = "DELETE"; caminho += `/${id}`; }
+
+    const r = await proxy(metodo, base + caminho, corpo, corpo ? "application/json" : null);
+    const res = { requisicao: `${metodo} ${base + caminho}` + (corpo ? `\nContent-Type: application/json\n\n${corpo}` : ""),
+                  resposta: bonito(r.corpo), status: `HTTP ${r.status || "erro"}`, ms: r.ms, enviado: bytes(corpo), recebido: bytes(r.corpo) };
+    if (r.status < 200 || r.status >= 300) {
+      let msg = r.corpo; try { const j = JSON.parse(r.corpo); msg = j.detail || j.message || j.error || msg; } catch {}
+      res.erro = msg || `HTTP ${r.status}`;
+    } else res.dados = r.corpo ? JSON.parse(r.corpo) : null;
+    return res;
+  },
+
+  async graphql(op, args) {
+    const { acao, ent } = descrever(op);
+    const f = ENT[ent].gql;
+    const { id, ...input } = args;
+    let query, variables = {}, campo;
+    if (CONSULTAS[op]) {
+      campo = CONSULTAS[op].gql;
+      query = `query ($id: ID!) {\n  ${campo}(${CONSULTAS[op].arg}: $id) { ${f} }\n}`;
+      variables = { id };
+    } else if (acao === "Listar") {
+      campo = ENT[ent].plural;
+      query = `query {\n  ${campo} { ${f} }\n}`;
+    } else if (acao === "Buscar") {
+      campo = lcfirst(ent);
+      query = `query ($id: ID!) {\n  ${campo}(id: $id) { ${f} }\n}`;
+      variables = { id };
+    } else {
+      campo = lcfirst(op);
+      const params = [], argsGql = [];
+      if (acao !== "Criar") { params.push("$id: ID!"); argsGql.push("id: $id"); variables.id = id; }
+      if (acao !== "Excluir") { params.push(`$input: ${ent}Input!`); argsGql.push("input: $input"); variables.input = input; }
+      query = `mutation (${params.join(", ")}) {\n  ${campo}(${argsGql.join(", ")})${acao === "Excluir" ? "" : ` { ${f} }`}\n}`;
+    }
+    const corpo = JSON.stringify({ query, variables });
+    const r = await proxy("POST", enderecos.graphql, corpo, "application/json");
+    const res = { requisicao: `POST ${enderecos.graphql}\n\n${query}\n\nvariables: ${JSON.stringify(variables, null, 2)}`,
+                  resposta: bonito(r.corpo), status: `HTTP ${r.status || "erro"}`, ms: r.ms, enviado: bytes(corpo), recebido: bytes(r.corpo) };
+    let j = null; try { j = JSON.parse(r.corpo); } catch {}
+    if (!j) res.erro = r.corpo || `HTTP ${r.status}`;
+    else if (j.errors && j.errors.length) res.erro = j.errors.map(e => e.message).join("; ");
+    else res.dados = j.data[campo];
+    return res;
+  },
+
+  async soap(op, args) {
+    const { acao, ent } = descrever(op);
+    const NS = "http://example.com/demo/streaming";
+    const campos = (acao === "Criar" || acao === "Atualizar") ? ENT[ent].campos : [];
+    const linhas = [];
+    if (args.id !== undefined) linhas.push(`<st:id>${esc(args.id)}</st:id>`);
+    for (const c of campos) {
+      const v = args[c];
+      if (c === "musicaIds") (v || []).forEach(m => linhas.push(`<st:musicaId>${esc(m)}</st:musicaId>`));
+      else if (v !== null && v !== undefined && v !== "") linhas.push(`<st:${c}>${esc(v)}</st:${c}>`);
+    }
+    const corpo =
+`<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:st="${NS}">
+  <soapenv:Body>
+    <st:${op}Request>${linhas.map(l => "\n      " + l).join("")}${linhas.length ? "\n    " : ""}</st:${op}Request>
+  </soapenv:Body>
+</soapenv:Envelope>`;
+    const r = await proxy("POST", enderecos.soap, corpo, "text/xml; charset=utf-8", "");
+    const res = { requisicao: `POST ${enderecos.soap}\nContent-Type: text/xml\n\n${corpo}`, resposta: xmlBonito(r.corpo),
+                  status: `HTTP ${r.status || "erro"}`, ms: r.ms, enviado: bytes(corpo), recebido: bytes(r.corpo) };
+    const doc = new DOMParser().parseFromString(r.corpo || "", "text/xml");
+    const body = doc.getElementsByTagNameNS("http://schemas.xmlsoap.org/soap/envelope/", "Body")[0];
+    const no = body && body.firstElementChild;
+    if (!no) { res.erro = r.corpo || `HTTP ${r.status}`; return res; }
+    if (no.localName === "Fault") {
+      const fs = no.getElementsByTagName("faultstring")[0];
+      res.erro = fs ? fs.textContent : "SOAP Fault";
+      return res;
+    }
+    res.dados = [...no.children].map(item => {
+      const o = { musicaIds: [] };
+      for (const c of item.children) {
+        if (c.localName === "musicaId") o.musicaIds.push(c.textContent);
+        else o[c.localName] = c.textContent;
+      }
+      return o;
+    });
+    return res;
+  },
+
+  async grpc(op, args) {
+    const { acao, ent } = descrever(op);
+    // catalogo.proto: no Atualizar os dados vão em "input"; as consultas começam com "Listar"
+    const corpo = {}, dados = {};
+    if (args.id !== undefined) corpo.id = args.id;
+    if (acao === "Criar" || acao === "Atualizar")
+      for (const c of ENT[ent].campos) if (args[c] !== null && args[c] !== undefined && args[c] !== "") dados[c] = args[c];
+    if (acao === "Atualizar") corpo.input = dados; else Object.assign(corpo, dados);
+    const rpc = CONSULTAS[op] ? `Listar${op}` : op;
+    const r = await fetch(`/grpc/${rpc}`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ endereco: enderecos.grpc, corpo }),
+    });
+    if (!r.ok) throw new Error((await r.json()).detail || r.statusText);
+    const j = await r.json();
+    const nBytes = hex => hex ? hex.split(" ").length : 0;
+    const res = {
+      requisicao: `rpc catalogo.Catalogo/${rpc} → ${enderecos.grpc}\n\nMensagem (JSON):\n${JSON.stringify(corpo, null, 2)}\n\nProtobuf binário (hex):\n${j.bytesRequisicao || "(vazio)"}`,
+      resposta: j.ok ? `Mensagem (JSON):\n${JSON.stringify(j.resposta, null, 2)}\n\nProtobuf binário (hex):\n${j.bytesResposta || "(vazio)"}` : `${j.codigo}: ${j.erro}`,
+      status: j.ok ? "OK" : j.codigo, ms: j.ms, enviado: nBytes(j.bytesRequisicao), recebido: nBytes(j.bytesResposta),
+    };
+    if (!j.ok) res.erro = j.erro || j.codigo;
+    else {
+      const valores = Object.values(j.resposta);
+      res.dados = descrever(op).lista ? (valores.find(Array.isArray) || []) : j.resposta;
+    }
+    return res;
+  },
+};
+
+function bonito(t) { try { return JSON.stringify(JSON.parse(t), null, 2); } catch { return t || "(vazio)"; } }
+function xmlBonito(xml) {
+  if (!xml) return "(vazio)";
+  let nivel = 0;
+  return xml.replace(/>\s*</g, ">\n<").split("\n").map(l => {
+    if (/^<\//.test(l)) nivel = Math.max(nivel - 1, 0);
+    const linha = "  ".repeat(nivel) + l;
+    if (/^<[^!?/][^>]*[^/]>$/.test(l) && !/<\/[^>]+>$/.test(l)) nivel++;
+    return linha;
+  }).join("\n");
+}
+
+// ===================== chamada genérica =====================
+// mostrar = false para as recargas automáticas (só entram no histórico)
+async function chamar(op, args = {}, mostrar = true) {
+  const p = protocolo, nome = rotulo();
+  let res;
+  try { res = await adaptadores[p](op, args); }
+  catch (e) { res = { erro: e.message, status: "erro", requisicao: "", resposta: e.message, ms: 0, enviado: 0, recebido: 0 }; }
+  registrar(nome, op, res);
+  if (mostrar || res.erro) detalhar(nome, op, res);
+  if (res.erro) throw new Error(res.erro);
+  const { ent, lista, acao } = descrever(op);
+  if (acao === "Excluir") return null;
+  const dados = lista && !Array.isArray(res.dados) ? [] : res.dados;
+  if (lista) return dados.map(o => normalizar(ent, o));
+  return normalizar(ent, Array.isArray(dados) ? dados[0] : dados);
+}
+
+function registrar(nome, op, r) {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td>${nome}</td><td>${op}</td><td class="${r.erro ? "erro" : "ok"}">${esc(r.status)}</td>
+    <td class="num">${(r.ms || 0).toFixed(1)}</td><td class="num">${r.enviado} B</td><td class="num">${r.recebido} B</td>`;
+  const tbody = document.querySelector("#log tbody");
+  tbody.prepend(tr);
+  while (tbody.children.length > 40) tbody.lastChild.remove();
+}
+
+function detalhar(nome, op, r) {
+  document.getElementById("detalhe").className = "";
+  document.getElementById("detalhe").innerHTML = `
+    <div class="meta"><span class="tag">${nome}</span><span>${op}</span>
+      <span>Status <b class="${r.erro ? "erro" : "ok"}">${esc(r.status)}</b></span>
+      <span>Tempo <b>${(r.ms || 0).toFixed(1)} ms</b></span>
+      <span>Enviado <b>${r.enviado} B</b></span><span>Recebido <b>${r.recebido} B</b></span></div>
+    ${r.erro ? `<p class="erro">${esc(r.erro)}</p>` : ""}
+    <div class="sub">Requisição</div><pre>${esc(r.requisicao)}</pre>
+    <div class="sub">Resposta</div><pre>${esc(r.resposta)}</pre>`;
+}
+
+// ===================== telas =====================
+let cache = { Usuario: [], Musica: [], Playlist: [] };
+const editando = { Usuario: null, Musica: null, Playlist: null };
+
+let recargas = 0;
+async function recarregar() {
+  // Se o protocolo mudar no meio da recarga, as respostas antigas são descartadas.
+  const minha = ++recargas;
+  let novo;
+  try {
+    const [u, m, p] = [await chamar("ListarUsuarios", {}, false), await chamar("ListarMusicas", {}, false), await chamar("ListarPlaylists", {}, false)];
+    novo = { Usuario: u, Musica: m, Playlist: p };
+  } catch { novo = { Usuario: [], Musica: [], Playlist: [] }; }
+  if (minha !== recargas) return;
+  cache = novo;
+  desenhar();
+}
+
+const nomeUsuario = id => (cache.Usuario.find(u => u.id === id) || {}).nome || `#${id}`;
+const nomeMusica = id => (cache.Musica.find(m => m.id === id) || {}).nome || `#${id}`;
+
+function linhas(ent, colunas, consulta) {
+  const tbody = document.getElementById(`lista-${ent.toLowerCase()}`);
+  const itens = cache[ent];
+  if (!itens.length) { tbody.innerHTML = `<tr><td colspan="${colunas.length + 2}" class="vazio">Nenhum registro.</td></tr>`; return; }
+  tbody.innerHTML = itens.map(o => `
+    <tr class="${editando[ent] === o.id ? "editando" : ""}">
+      <td class="num">${o.id}</td>${colunas.map(c => `<td>${esc(c(o))}</td>`).join("")}
+      <td class="acoes">
+        <button class="btn mini" data-consulta="${consulta[0]}" data-id="${o.id}">${consulta[1]}</button>
+        <button class="btn mini" data-editar="${ent}" data-id="${o.id}">Editar</button>
+        <button class="btn mini perigo" data-excluir="${ent}" data-id="${o.id}">Excluir</button>
+      </td>
+    </tr>`).join("");
+}
+
+function desenhar() {
+  linhas("Usuario", [o => o.nome, o => o.idade ?? ""], ["PlaylistsDoUsuario", "Playlists"]);
+  linhas("Musica", [o => o.nome, o => o.artista], ["PlaylistsDaMusica", "Playlists"]);
+  linhas("Playlist", [o => o.nome, o => nomeUsuario(o.usuarioId), o => o.musicaIds.map(nomeMusica).join(", ")], ["MusicasDaPlaylist", "Músicas"]);
+
+  const sel = document.querySelector("#form-playlist [name=usuarioId]");
+  const atual = sel.value;
+  sel.innerHTML = `<option value="">Usuário…</option>` + cache.Usuario.map(u => `<option value="${u.id}">${esc(u.nome)} (#${u.id})</option>`).join("");
+  sel.value = atual;
+  const checks = document.getElementById("checks-musicas");
+  const marcadas = new Set([...checks.querySelectorAll("input:checked")].map(i => Number(i.value)));
+  checks.innerHTML = cache.Musica.length
+    ? "Músicas: " + cache.Musica.map(m => `<label><input type="checkbox" value="${m.id}" ${marcadas.has(m.id) ? "checked" : ""}>${esc(m.nome)}</label>`).join("")
+    : "Cadastre músicas para adicioná-las à playlist.";
+}
+
+function lerForm(ent) {
+  const f = document.getElementById(`form-${ent.toLowerCase()}`);
+  const d = {};
+  for (const c of ENT[ent].campos) {
+    if (c === "musicaIds") d.musicaIds = [...f.querySelectorAll("#checks-musicas input:checked")].map(i => Number(i.value));
+    else if (c === "idade" || c === "usuarioId") d[c] = f[c].value === "" ? null : Number(f[c].value);
+    else d[c] = f[c].value;
+  }
+  return d;
+}
+
+function preencherForm(ent, o) {
+  const f = document.getElementById(`form-${ent.toLowerCase()}`);
+  for (const c of ENT[ent].campos) {
+    if (c === "musicaIds") f.querySelectorAll("#checks-musicas input").forEach(i => i.checked = o.musicaIds.includes(Number(i.value)));
+    else f[c].value = o[c] ?? "";
+  }
+}
+
+for (const ent of Object.keys(ENT)) {
+  const f = document.getElementById(`form-${ent.toLowerCase()}`);
+  f.addEventListener("submit", async e => {
+    e.preventDefault();
+    const dados = lerForm(ent);
+    try {
+      if (editando[ent] !== null) await chamar(`Atualizar${ent}`, { id: editando[ent], ...dados });
+      else await chamar(`Criar${ent}`, dados);
+      f.reset();
+    } catch {}
+    await recarregar();
+  });
+  f.addEventListener("reset", () => { editando[ent] = null; setTimeout(desenhar); });
+}
+
+document.querySelector("main").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-id]");
+  if (!b) return;
+  const id = Number(b.dataset.id);
+  if (b.dataset.editar) {
+    const ent = b.dataset.editar;
+    try { const o = await chamar(`Buscar${ent}`, { id }); editando[ent] = id; desenhar(); preencherForm(ent, o); } catch {}
+  } else if (b.dataset.excluir) {
+    try { await chamar(`Excluir${b.dataset.excluir}`, { id }); } catch {}
+    await recarregar();
+  } else if (b.dataset.consulta) {
+    const op = b.dataset.consulta;
+    const div = document.getElementById("consulta");
+    try {
+      const itens = await chamar(op, { id });
+      const ent = CONSULTAS[op].ent;
+      div.className = "";
+      div.innerHTML = `<div class="meta"><span class="tag">${rotulo()}</span><span>${op}(${id})</span><span><b>${itens.length}</b> resultado(s)</span></div>` +
+        (itens.length ? `<table><thead><tr><th class="num">id</th><th>Nome</th><th>${ent === "Musica" ? "Artista" : "Músicas"}</th></tr></thead><tbody>` +
+          itens.map(o => `<tr><td class="num">${o.id}</td><td>${esc(o.nome)}</td><td>${esc(ent === "Musica" ? o.artista : o.musicaIds.map(nomeMusica).join(", "))}</td></tr>`).join("") +
+          `</tbody></table>` : `<div class="vazio">Nenhum resultado.</div>`);
+    } catch (err) { div.className = "erro"; div.textContent = err.message; }
+  }
+});
+
+async function criarExemplo() {
+  try {
+    const u = [await chamar("CriarUsuario", { nome: "Ana", idade: 21 }), await chamar("CriarUsuario", { nome: "Bruno", idade: 25 })];
+    const musicas = [["Garota de Ipanema", "Tom Jobim"], ["Aquarela", "Toquinho"], ["Construção", "Chico Buarque"], ["Asa Branca", "Luiz Gonzaga"]];
+    const m = [];
+    for (const [nome, artista] of musicas) m.push(await chamar("CriarMusica", { nome, artista }));
+    await chamar("CriarPlaylist", { nome: "MPB", usuarioId: u[0].id, musicaIds: [m[0].id, m[1].id, m[2].id] });
+    await chamar("CriarPlaylist", { nome: "Forró", usuarioId: u[1].id, musicaIds: [m[3].id] });
+    await chamar("CriarPlaylist", { nome: "Favoritas", usuarioId: u[1].id, musicaIds: [m[0].id, m[3].id] });
+  } catch {}
+  await recarregar();
+}
+
+// ===================== protocolo / endereço =====================
+const inputEndereco = document.getElementById("endereco");
+function escolher(p) {
+  protocolo = p;
+  localStorage.setItem("protocolo", p);
+  document.querySelectorAll("#protocolos button").forEach(b => b.classList.toggle("ativo", b.dataset.p === p));
+  document.querySelectorAll("#implementacoes button").forEach(b => b.classList.toggle("ativo", b.dataset.i === impl));
+  inputEndereco.value = enderecos[p];
+  for (const ent of Object.keys(ENT)) editando[ent] = null;
+  cache = { Usuario: [], Musica: [], Playlist: [] };  // não mostrar dados do protocolo anterior
+  desenhar();
+  const c = document.getElementById("consulta");
+  c.className = "vazio";
+  c.textContent = "Use os botões de consulta nas tabelas, por exemplo \"Playlists\" ao lado de um usuário.";
+  recarregar();
+}
+document.getElementById("protocolos").addEventListener("click", e => { if (e.target.dataset.p) escolher(e.target.dataset.p); });
+document.getElementById("implementacoes").addEventListener("click", e => {
+  if (!e.target.dataset.i) return;
+  impl = e.target.dataset.i;
+  localStorage.setItem("impl", impl);
+  enderecos = todosEnderecos[impl];
+  escolher(protocolo);
+});
+inputEndereco.addEventListener("change", () => {
+  enderecos[protocolo] = inputEndereco.value.trim() || PADRAO[impl][protocolo];
+  inputEndereco.value = enderecos[protocolo];
+  localStorage.setItem("enderecos-v2", JSON.stringify(todosEnderecos));
+  recarregar();
+});
+document.getElementById("btn-recarregar").addEventListener("click", recarregar);
+document.getElementById("btn-exemplo").addEventListener("click", criarExemplo);
+escolher(protocolo);
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Dependências de todas as versões Python e do frontend (um único ambiente virtual)
+fastapi
+uvicorn
+httpx
+strawberry-graphql
+lxml
+zeep
+grpcio
+grpcio-tools
+protobuf

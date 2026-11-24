@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://example.com/demo/streaming"
+           xmlns:st="http://example.com/demo/streaming"
+           elementFormDefault="qualified">
+
+    <xs:complexType name="VazioType"/>
+
+    <xs:complexType name="IdRequestType">
+        <xs:sequence><xs:element name="id" type="xs:long"/></xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="UsuarioRequestType">
+        <xs:sequence>
+            <xs:element name="nome" type="xs:string"/>
+            <xs:element name="idade" type="xs:int"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="UsuarioUpdateRequestType">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long"/>
+            <xs:element name="nome" type="xs:string"/>
+            <xs:element name="idade" type="xs:int"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="MusicaRequestType">
+        <xs:sequence>
+            <xs:element name="nome" type="xs:string"/>
+            <xs:element name="artista" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="MusicaUpdateRequestType">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long"/>
+            <xs:element name="nome" type="xs:string"/>
+            <xs:element name="artista" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="PlaylistRequestType">
+        <xs:sequence>
+            <xs:element name="nome" type="xs:string"/>
+            <xs:element name="usuarioId" type="xs:long"/>
+            <xs:element name="musicaId" type="xs:long" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="PlaylistUpdateRequestType">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long"/>
+            <xs:element name="nome" type="xs:string"/>
+            <xs:element name="usuarioId" type="xs:long"/>
+            <xs:element name="musicaId" type="xs:long" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="UsuarioType">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long"/>
+            <xs:element name="nome" type="xs:string"/>
+            <xs:element name="idade" type="xs:int"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="MusicaType">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long"/>
+            <xs:element name="nome" type="xs:string"/>
+            <xs:element name="artista" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="PlaylistType">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long"/>
+            <xs:element name="nome" type="xs:string"/>
+            <xs:element name="usuarioId" type="xs:long"/>
+            <xs:element name="musicaId" type="xs:long" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="UsuariosResponseType">
+        <xs:sequence><xs:element name="usuario" type="st:UsuarioType" minOccurs="0" maxOccurs="unbounded"/></xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="UsuarioResponseType">
+        <xs:sequence><xs:element name="usuario" type="st:UsuarioType"/></xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="MusicasResponseType">
+        <xs:sequence><xs:element name="musica" type="st:MusicaType" minOccurs="0" maxOccurs="unbounded"/></xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="MusicaResponseType">
+        <xs:sequence><xs:element name="musica" type="st:MusicaType"/></xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="PlaylistsResponseType">
+        <xs:sequence><xs:element name="playlist" type="st:PlaylistType" minOccurs="0" maxOccurs="unbounded"/></xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="PlaylistResponseType">
+        <xs:sequence><xs:element name="playlist" type="st:PlaylistType"/></xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="ListarUsuariosRequest" type="st:VazioType"/>
+    <xs:element name="ListarUsuariosResponse" type="st:UsuariosResponseType"/>
+    <xs:element name="BuscarUsuarioRequest" type="st:IdRequestType"/>
+    <xs:element name="BuscarUsuarioResponse" type="st:UsuarioResponseType"/>
+    <xs:element name="CriarUsuarioRequest" type="st:UsuarioRequestType"/>
+    <xs:element name="CriarUsuarioResponse" type="st:UsuarioResponseType"/>
+    <xs:element name="AtualizarUsuarioRequest" type="st:UsuarioUpdateRequestType"/>
+    <xs:element name="AtualizarUsuarioResponse" type="st:UsuarioResponseType"/>
+    <xs:element name="ExcluirUsuarioRequest" type="st:IdRequestType"/>
+    <xs:element name="ExcluirUsuarioResponse" type="st:VazioType"/>
+
+    <xs:element name="ListarMusicasRequest" type="st:VazioType"/>
+    <xs:element name="ListarMusicasResponse" type="st:MusicasResponseType"/>
+    <xs:element name="BuscarMusicaRequest" type="st:IdRequestType"/>
+    <xs:element name="BuscarMusicaResponse" type="st:MusicaResponseType"/>
+    <xs:element name="CriarMusicaRequest" type="st:MusicaRequestType"/>
+    <xs:element name="CriarMusicaResponse" type="st:MusicaResponseType"/>
+    <xs:element name="AtualizarMusicaRequest" type="st:MusicaUpdateRequestType"/>
+    <xs:element name="AtualizarMusicaResponse" type="st:MusicaResponseType"/>
+    <xs:element name="ExcluirMusicaRequest" type="st:IdRequestType"/>
+    <xs:element name="ExcluirMusicaResponse" type="st:VazioType"/>
+
+    <xs:element name="ListarPlaylistsRequest" type="st:VazioType"/>
+    <xs:element name="ListarPlaylistsResponse" type="st:PlaylistsResponseType"/>
+    <xs:element name="BuscarPlaylistRequest" type="st:IdRequestType"/>
+    <xs:element name="BuscarPlaylistResponse" type="st:PlaylistResponseType"/>
+    <xs:element name="CriarPlaylistRequest" type="st:PlaylistRequestType"/>
+    <xs:element name="CriarPlaylistResponse" type="st:PlaylistResponseType"/>
+    <xs:element name="AtualizarPlaylistRequest" type="st:PlaylistUpdateRequestType"/>
+    <xs:element name="AtualizarPlaylistResponse" type="st:PlaylistResponseType"/>
+    <xs:element name="ExcluirPlaylistRequest" type="st:IdRequestType"/>
+    <xs:element name="ExcluirPlaylistResponse" type="st:VazioType"/>
+
+    <xs:element name="PlaylistsDoUsuarioRequest" type="st:IdRequestType"/>
+    <xs:element name="PlaylistsDoUsuarioResponse" type="st:PlaylistsResponseType"/>
+    <xs:element name="MusicasDaPlaylistRequest" type="st:IdRequestType"/>
+    <xs:element name="MusicasDaPlaylistResponse" type="st:MusicasResponseType"/>
+    <xs:element name="PlaylistsDaMusicaRequest" type="st:IdRequestType"/>
+    <xs:element name="PlaylistsDaMusicaResponse" type="st:PlaylistsResponseType"/>
+</xs:schema>
