@@ -12,7 +12,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Abra `http://localhost:8000/graphql`. O GraphiQL, editor que roda no navegador, permite executar as consultas abaixo.
+Abra `http://localhost:8080/graphql`. O GraphiQL, editor que roda no navegador, permite executar as consultas abaixo.
 
 ## Exemplos
 
