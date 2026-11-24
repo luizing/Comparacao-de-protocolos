@@ -7,19 +7,19 @@ from zeep.exceptions import Fault
 
 
 def main():
-    s = Client("http://localhost:8000/soap?wsdl").service
+    s = Client("http://localhost:8080/ws/streaming.wsdl").service
 
     ana = s.CriarUsuario(nome="Ana", idade=20)
     m1 = s.CriarMusica(nome="Song A", artista="X")
     m2 = s.CriarMusica(nome="Song B", artista="Y")
-    fav = s.CriarPlaylist(nome="Fav", usuarioId=ana.id, musicaIds=[m1.id, m2.id])
+    fav = s.CriarPlaylist(nome="Fav", usuarioId=ana.id, musicaId=[m1.id, m2.id])
     print("Playlist criada:", fav)
 
     print("Usuários:", s.ListarUsuarios())
     print("Músicas:", s.ListarMusicas())
-    print("Playlists do usuário:", s.PlaylistsDoUsuario(usuarioId=ana.id))
-    print("Músicas da playlist:", s.MusicasDaPlaylist(playlistId=fav.id))
-    print("Playlists da música:", s.PlaylistsDaMusica(musicaId=m1.id))
+    print("Playlists do usuário:", s.PlaylistsDoUsuario(id=ana.id))
+    print("Músicas da playlist:", s.MusicasDaPlaylist(id=fav.id))
+    print("Playlists da música:", s.PlaylistsDaMusica(id=m1.id))
 
     print("Atualizado:", s.AtualizarUsuario(id=ana.id, nome="Ana B", idade=21))
     s.ExcluirMusica(id=m1.id)

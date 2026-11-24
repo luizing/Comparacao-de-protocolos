@@ -1,8 +1,9 @@
 """Serviço de streaming de músicas - versão SOAP 1.1 em Python (FastAPI + lxml).
 
-Estilo document/literal wrapped, o mesmo usado pelo Spring Web Services.
-  WSDL:     GET  http://localhost:8000/soap?wsdl
-  Endpoint: POST http://localhost:8000/soap
+Mesmo contrato da versão Java (Spring Web Services, streaming.xsd):
+mesmo namespace, elementos <Operacao>Request/<Operacao>Response e campos.
+  WSDL:     GET  http://localhost:8080/ws/streaming.wsdl
+  Endpoint: POST http://localhost:8080/ws
 """
 from fastapi import FastAPI, Request, Response
 from lxml import etree
@@ -10,8 +11,8 @@ from lxml import etree
 from catalogo import Catalogo, NaoEncontrado
 
 SOAP_ENV = "http://schemas.xmlsoap.org/soap/envelope/"
-TNS = "http://streaming.example.com/soap"
-URL = "http://localhost:8000/soap"
+TNS = "http://example.com/demo/streaming"
+URL = "http://localhost:8080/ws"
 
 service = Catalogo()
 
@@ -21,13 +22,16 @@ TIPOS = {
     "Usuario": [("id", "long", False), ("nome", "string", False), ("idade", "int", False)],
     "Musica": [("id", "long", False), ("nome", "string", False), ("artista", "string", False)],
     "Playlist": [("id", "long", False), ("nome", "string", False), ("usuarioId", "long", False),
-                 ("musicaIds", "long", True)],
+                 ("musicaId", "long", True)],
 }
+
+# nome do elemento XML -> chave no dicionário do catálogo
+CHAVES = {"musicaId": "musicaIds"}
 
 ID = [("id", "long", False)]
 USUARIO_IN = [("nome", "string", False), ("idade", "int", False)]
 MUSICA_IN = [("nome", "string", False), ("artista", "string", False)]
-PLAYLIST_IN = [("nome", "string", False), ("usuarioId", "long", False), ("musicaIds", "long", True)]
+PLAYLIST_IN = [("nome", "string", False), ("usuarioId", "long", False), ("musicaId", "long", True)]
 
 # ---------- operações ----------
 # nome: (campos de entrada, (tipo de retorno, é lista?) ou None, função)
@@ -49,18 +53,15 @@ OPERACOES = {
     "ListarPlaylists": ([], ("Playlist", True), lambda a: service.listar_playlists()),
     "BuscarPlaylist": (ID, ("Playlist", False), lambda a: service.buscar_playlist(a["id"])),
     "CriarPlaylist": (PLAYLIST_IN, ("Playlist", False),
-                      lambda a: service.criar_playlist(a["nome"], a["usuarioId"], a["musicaIds"])),
+                      lambda a: service.criar_playlist(a["nome"], a["usuarioId"], a["musicaId"])),
     "AtualizarPlaylist": (ID + PLAYLIST_IN, ("Playlist", False),
-                          lambda a: service.atualizar_playlist(a["id"], a["nome"], a["usuarioId"], a["musicaIds"])),
+                          lambda a: service.atualizar_playlist(a["id"], a["nome"], a["usuarioId"], a["musicaId"])),
     "ExcluirPlaylist": (ID, None, lambda a: service.excluir_playlist(a["id"])),
 
     # consultas pedidas no enunciado
-    "PlaylistsDoUsuario": ([("usuarioId", "long", False)], ("Playlist", True),
-                           lambda a: service.playlists_do_usuario(a["usuarioId"])),
-    "MusicasDaPlaylist": ([("playlistId", "long", False)], ("Musica", True),
-                          lambda a: service.musicas_da_playlist(a["playlistId"])),
-    "PlaylistsDaMusica": ([("musicaId", "long", False)], ("Playlist", True),
-                          lambda a: service.playlists_da_musica(a["musicaId"])),
+    "PlaylistsDoUsuario": (ID, ("Playlist", True), lambda a: service.playlists_do_usuario(a["id"])),
+    "MusicasDaPlaylist": (ID, ("Musica", True), lambda a: service.musicas_da_playlist(a["id"])),
+    "PlaylistsDaMusica": (ID, ("Playlist", True), lambda a: service.playlists_da_musica(a["id"])),
 }
 
 
@@ -82,7 +83,7 @@ def gerar_wsdl():
     )
     elementos, mensagens, port_ops, binding_ops = [], [], [], []
     for op, (entrada, saida, _) in OPERACOES.items():
-        elementos.append(f'<xs:element name="{op}"><xs:complexType><xs:sequence>'
+        elementos.append(f'<xs:element name="{op}Request"><xs:complexType><xs:sequence>'
                          f'{_sequencia(entrada)}</xs:sequence></xs:complexType></xs:element>')
         retorno = ""
         if saida:
@@ -91,11 +92,11 @@ def gerar_wsdl():
                        f'{VARIOS if lista else ""}/>')
         elementos.append(f'<xs:element name="{op}Response"><xs:complexType><xs:sequence>'
                          f'{retorno}</xs:sequence></xs:complexType></xs:element>')
-        mensagens.append(f'<wsdl:message name="{op}Request"><wsdl:part name="parameters" element="tns:{op}"/></wsdl:message>'
+        mensagens.append(f'<wsdl:message name="{op}Request"><wsdl:part name="parameters" element="tns:{op}Request"/></wsdl:message>'
                          f'<wsdl:message name="{op}Response"><wsdl:part name="parameters" element="tns:{op}Response"/></wsdl:message>')
         port_ops.append(f'<wsdl:operation name="{op}"><wsdl:input message="tns:{op}Request"/>'
                         f'<wsdl:output message="tns:{op}Response"/></wsdl:operation>')
-        binding_ops.append(f'<wsdl:operation name="{op}"><soap:operation soapAction="{op}"/>'
+        binding_ops.append(f'<wsdl:operation name="{op}"><soap:operation soapAction=""/>'
                            f'<wsdl:input><soap:body use="literal"/></wsdl:input>'
                            f'<wsdl:output><soap:body use="literal"/></wsdl:output></wsdl:operation>')
     return f"""<?xml version="1.0" encoding="UTF-8"?>
@@ -107,13 +108,13 @@ def gerar_wsdl():
     <xs:schema targetNamespace="{TNS}" elementFormDefault="qualified">{tipos}{"".join(elementos)}</xs:schema>
   </wsdl:types>
   {"".join(mensagens)}
-  <wsdl:portType name="StreamingPortType">{"".join(port_ops)}</wsdl:portType>
-  <wsdl:binding name="StreamingBinding" type="tns:StreamingPortType">
+  <wsdl:portType name="StreamingPort">{"".join(port_ops)}</wsdl:portType>
+  <wsdl:binding name="StreamingPortSoap11" type="tns:StreamingPort">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
     {"".join(binding_ops)}
   </wsdl:binding>
-  <wsdl:service name="StreamingService">
-    <wsdl:port name="StreamingPort" binding="tns:StreamingBinding"><soap:address location="{URL}"/></wsdl:port>
+  <wsdl:service name="StreamingPortService">
+    <wsdl:port name="StreamingPortSoap11" binding="tns:StreamingPortSoap11"><soap:address location="{URL}"/></wsdl:port>
   </wsdl:service>
 </wsdl:definitions>"""
 
@@ -136,14 +137,14 @@ def ler_argumentos(elemento, campos):
 def escrever_objeto(pai, tag, tipo, dados):
     obj = etree.SubElement(pai, f"{{{TNS}}}{tag}")
     for nome, _, rep in TIPOS[tipo]:
-        valor = dados.get(nome)
+        valor = dados.get(CHAVES.get(nome, nome))
         for v in (valor if rep else [valor]):
             if v is not None:
                 etree.SubElement(obj, f"{{{TNS}}}{nome}").text = str(v)
 
 
 def envelope():
-    env = etree.Element(f"{{{SOAP_ENV}}}Envelope", nsmap={"soapenv": SOAP_ENV, "tns": TNS})
+    env = etree.Element(f"{{{SOAP_ENV}}}Envelope", nsmap={"soapenv": SOAP_ENV, "st": TNS})
     return env, etree.SubElement(env, f"{{{SOAP_ENV}}}Body")
 
 
@@ -164,12 +165,12 @@ def fault(codigo, mensagem):
 app = FastAPI(title="Streaming de Músicas - SOAP (Python)")
 
 
-@app.get("/soap")
+@app.get("/ws/streaming.wsdl")
 def wsdl():
     return Response(content=WSDL, media_type="text/xml; charset=utf-8")
 
 
-@app.post("/soap")
+@app.post("/ws")
 async def soap(request: Request):
     try:
         raiz = etree.fromstring(await request.body())
@@ -177,7 +178,8 @@ async def soap(request: Request):
     except Exception:
         return fault("Client", "Envelope SOAP inválido")
 
-    op = etree.QName(requisicao).localname
+    nome = etree.QName(requisicao).localname
+    op = nome[:-len("Request")] if nome.endswith("Request") else nome
     if op not in OPERACOES:
         return fault("Client", f"Operação desconhecida: {op}")
     entrada, saida, funcao = OPERACOES[op]
@@ -199,4 +201,4 @@ async def soap(request: Request):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8080)
