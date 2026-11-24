@@ -15,10 +15,9 @@ import com.example.demo.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class CatalogoService {
@@ -156,8 +155,8 @@ public class CatalogoService {
         return playlists.findById(id).orElseThrow(() -> naoEncontrado("Playlist", id));
     }
 
-    private ResponseStatusException naoEncontrado(String recurso, Long id) {
-        return new ResponseStatusException(HttpStatus.NOT_FOUND, recurso + " " + id + " não encontrado");
+    private NoSuchElementException naoEncontrado(String recurso, Long id) {
+        return new NoSuchElementException(recurso + " " + id + " não encontrado");
     }
 
     private UsuarioResponse usuarioResponse(Usuario usuario) {

@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package catalogo;
+
+option java_multiple_files = true;
+option java_package = "com.example.demo.grpc";
+option java_outer_classname = "CatalogoProto";
+
+import "google/protobuf/empty.proto";
+
+service Catalogo {
+  rpc ListarUsuarios(google.protobuf.Empty) returns (UsuariosResponse);
+  rpc BuscarUsuario(IdRequest) returns (Usuario);
+  rpc CriarUsuario(UsuarioRequest) returns (Usuario);
+  rpc AtualizarUsuario(AtualizarUsuarioRequest) returns (Usuario);
+  rpc ExcluirUsuario(IdRequest) returns (google.protobuf.Empty);
+
+  rpc ListarMusicas(google.protobuf.Empty) returns (MusicasResponse);
+  rpc BuscarMusica(IdRequest) returns (Musica);
+  rpc CriarMusica(MusicaRequest) returns (Musica);
+  rpc AtualizarMusica(AtualizarMusicaRequest) returns (Musica);
+  rpc ExcluirMusica(IdRequest) returns (google.protobuf.Empty);
+
+  rpc ListarPlaylists(google.protobuf.Empty) returns (PlaylistsResponse);
+  rpc BuscarPlaylist(IdRequest) returns (Playlist);
+  rpc CriarPlaylist(PlaylistRequest) returns (Playlist);
+  rpc AtualizarPlaylist(AtualizarPlaylistRequest) returns (Playlist);
+  rpc ExcluirPlaylist(IdRequest) returns (google.protobuf.Empty);
+
+  rpc ListarPlaylistsDoUsuario(IdRequest) returns (PlaylistsResponse);
+  rpc ListarMusicasDaPlaylist(IdRequest) returns (MusicasResponse);
+  rpc ListarPlaylistsDaMusica(IdRequest) returns (PlaylistsResponse);
+}
+
+message IdRequest { int64 id = 1; }
+
+message UsuarioRequest {
+  string nome = 1;
+  int32 idade = 2;
+}
+
+message MusicaRequest {
+  string nome = 1;
+  string artista = 2;
+}
+
+message PlaylistRequest {
+  string nome = 1;
+  int64 usuario_id = 2;
+  repeated int64 musica_ids = 3;
+}
+
+message AtualizarUsuarioRequest {
+  int64 id = 1;
+  UsuarioRequest input = 2;
+}
+
+message AtualizarMusicaRequest {
+  int64 id = 1;
+  MusicaRequest input = 2;
+}
+
+message AtualizarPlaylistRequest {
+  int64 id = 1;
+  PlaylistRequest input = 2;
+}
+
+message Usuario {
+  int64 id = 1;
+  string nome = 2;
+  int32 idade = 3;
+}
+
+message Musica {
+  int64 id = 1;
+  string nome = 2;
+  string artista = 3;
+}
+
+message Playlist {
+  int64 id = 1;
+  string nome = 2;
+  int64 usuario_id = 3;
+  repeated int64 musica_ids = 4;
+}
+
+message UsuariosResponse { repeated Usuario usuarios = 1; }
+message MusicasResponse { repeated Musica musicas = 1; }
+message PlaylistsResponse { repeated Playlist playlists = 1; }
