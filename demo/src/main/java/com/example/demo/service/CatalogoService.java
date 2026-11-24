@@ -20,6 +20,7 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional
 public class CatalogoService {
 
     private final UsuarioRepository usuarios;
